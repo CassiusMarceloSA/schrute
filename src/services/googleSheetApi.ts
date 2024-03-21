@@ -10,6 +10,10 @@ type SpreadsheetExpense = Expense & {
 
 const ENV = import.meta.env
 
+function parseRowToObject(row: GoogleSpreadsheetRow) {
+    return row.toObject();
+}
+
 function parseCurrencyToNumber(value: string) {
     const unmaskedValue = value.replace('$', '').replace(',', '')
     return Number(unmaskedValue)
@@ -17,7 +21,7 @@ function parseCurrencyToNumber(value: string) {
 
 function parseRowsToExpenses(rows: GoogleSpreadsheetRow[]): Expense[] {
     return rows.map(item => {
-        const rowToObject = item.toObject() as SpreadsheetExpense;
+        const rowToObject = parseRowToObject(item) as SpreadsheetExpense;
 
         return {
             ...rowToObject,
@@ -42,8 +46,7 @@ export async function getSheetByTitle(doc: GoogleSpreadsheet, sheetTitle: string
 }
 
 export async function getRows(sheet: GoogleSpreadsheetWorksheet) {
-    const rows = await sheet.getRows();
-    return parseRowsToExpenses(rows)
+    return sheet.getRows();
 }
 
 export async function addRow(sheet: GoogleSpreadsheetWorksheet, data: Expense) {
@@ -52,4 +55,18 @@ export async function addRow(sheet: GoogleSpreadsheetWorksheet, data: Expense) {
 
 export async function deleteRow(row: GoogleSpreadsheetRow) {
     return row.delete()
+}
+
+export async function getAllExpenses(doc: GoogleSpreadsheet) {
+    const [feesResponse, recurrentFeesResponse] = doc.sheetsByIndex;
+
+    const [feesRows, recurrentFeesRows] = await Promise.all([feesResponse.getRows(), recurrentFeesResponse.getRows()])
+
+    const expenses = parseRowsToExpenses(feesRows)
+    const recurrentExpenses = parseRowsToExpenses(recurrentFeesRows)
+
+    return {
+        expenses,
+        recurrentExpenses
+    }
 }
