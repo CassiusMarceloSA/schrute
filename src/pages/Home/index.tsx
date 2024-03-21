@@ -1,16 +1,72 @@
-import React from 'react'
+import { useFetchDataBySheet } from '@/hooks'
+import { Equal, Plus } from 'lucide-react';
+import React, { useMemo } from 'react'
 
-const Home = () => (
-    <div className='p-2 h-screen w-screen color text-red-700 grid grid-cols-10 gap-2 grid-rows-12'>
-        <nav className='rounded-lg flex items-center justify-center col-start-1 col-end-3 bg-cyan-700 row-start-1 row-end-10' >
-            Aside Here
-        </nav>
-        <main className='rounded-lg flex items-center justify-center bg-green-600 col-start-3 col-end-13 row-start-1 row-end-10 ' >
-            Main content here
-        </main>
-        <footer className='rounded-lg flex items-center justify-center row-start-10 row-end-13 col-start-1 col-end-13 bg-slate-500' >Footer here</footer>
-    </div>
+const formatCurrencyToBRL = (value: number) => Intl.NumberFormat('pt-BR', {
+    currency: 'BRL',
+    style: 'currency'
+}).format(value)
 
-)
+const Home = () => {
+    const { data, getCurrentExpensesSum, getReccurencyExpensesSum } = useFetchDataBySheet();
+
+    const reccurencyExpensesSum = useMemo(() => getReccurencyExpensesSum(), [data]);
+    const currentExpensesSum = useMemo(() => getCurrentExpensesSum(), [data]);
+
+    console.log(reccurencyExpensesSum, currentExpensesSum)
+    return (
+        <div className='bg-black p-2 h-screen w-screen color text-zinc-100 grid grid-cols-10 gap-3 grid-rows-12'>
+            <nav className='bg-zinc-900 rounded-lg flex items-center justify-center col-start-1 col-end-4 row-start-1 row-end-10' >
+                Aside Here
+            </nav>
+            <main className=' bg-zinc-800 overflow-hidden rounded-lg flex items-center justify-between col-start-4 col-end-13 row-start-1 row-end-10 ' >
+                <div className='flex items-center justify-center w-full h-full' >
+                    {formatCurrencyToBRL(currentExpensesSum + reccurencyExpensesSum)}
+                </div>
+                <div className='flex justify-between w-1/2 h-full flex-col gap-1 border-l-4 border-black relative' >
+                    <div className='h-full p-2 flex flex-col items-center justify-center' >
+                        <p className='text-start text-zinc-100 text-lg' >
+                            Despesas recorrentes
+                        </p>
+                        <p className='text-start font-light'>
+
+                            {formatCurrencyToBRL(reccurencyExpensesSum)}
+                        </p>
+                    </div>
+                    <div className='bg-black m-0 rounded-full w-full h-1 flex items-center justify-center '>
+                        <div className='bg-black rounded-full' >
+                            <Plus size={48} />
+                        </div>
+                    </div>
+
+                    <div className='h-full p-2 flex flex-col items-center justify-center' >
+                        <p className='text-start text-zinc-100 text-lg' >
+                            Despesas do mes
+                        </p>
+                        <p className='text-start text-zinc-300 font-light'>
+                            {formatCurrencyToBRL(currentExpensesSum)}
+                        </p>
+                    </div>
+                    <div className='bg-black m-0 rounded-full w-full h-1 flex items-center justify-center '>
+                        <div className='bg-black rounded-full' >
+                            <Equal size={48} />
+                        </div>
+                    </div>
+                    <div className='h-full m-2 p-2 rounded-lg flex flex-col items-center justify-center relative' >
+
+                        <p className='text-start text-zinc-100 text-lg' >
+                            Total das despesas
+                        </p>
+                        <p className='text-start text-zinc-300 font-light'>
+                            {formatCurrencyToBRL(currentExpensesSum + reccurencyExpensesSum)}
+                        </p>
+                    </div>
+                </div>
+            </main>
+            <footer className='rounded-lg flex items-center justify-center row-start-10 row-end-13 col-start-1 col-end-13' >Footer here</footer>
+        </div>
+
+    )
+}
 
 export default Home

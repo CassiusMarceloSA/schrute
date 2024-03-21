@@ -6,7 +6,8 @@ import { useCallback, useEffect, useReducer } from 'react';
 type State = {
     data: {
         sheetInfo?: GoogleSpreadsheet
-        expenses: Expense[]
+        expenses: Expense[];
+        recurrentExpenses: Expense[];
     }
     loading: boolean
     error?: string
@@ -17,7 +18,12 @@ type Action =
     | { type: 'REQUEST_FINISH' }
     | { type: 'REQUEST_FAILURE'; payload: string }
     | { type: 'SET_SHEET_INFO'; payload: GoogleSpreadsheet }
-    | { type: 'SET_EXPENSES'; payload: Expense[] }
+    | {
+        type: 'SET_EXPENSES'; payload: {
+            expenses: Expense[];
+            recurrentExpenses: Expense[];
+        }
+    }
 
 const reducer = (state: State, action: Action): State => {
     switch (action.type) {
@@ -28,7 +34,7 @@ const reducer = (state: State, action: Action): State => {
         case 'REQUEST_FAILURE':
             return { ...state, error: action.payload }
         case 'SET_EXPENSES':
-            return { ...state, data: { ...state.data, expenses: action.payload } }
+            return { ...state, data: { ...state.data, ...action.payload } }
 
         case 'SET_SHEET_INFO':
             return { ...state, data: { ...state.data, sheetInfo: action.payload } }
@@ -39,7 +45,8 @@ const reducer = (state: State, action: Action): State => {
 
 const INITIAL_STATE: State = {
     data: {
-        expenses: []
+        expenses: [],
+        recurrentExpenses: []
     },
     loading: false,
 }
@@ -65,9 +72,8 @@ function useFetchDataBySheet() {
         try {
             dispatch({ type: 'REQUEST_INIT' });
             const data = await GoogleSheetAPI.getAllExpenses(sheet);
-            console.log({ data })
             localStorage.setItem('EXPENSES_DATA', JSON.stringify(data))
-            dispatch({ type: 'SET_EXPENSES', payload: data.expenses })
+            dispatch({ type: 'SET_EXPENSES', payload: data })
         } catch (e) {
             dispatch({ type: 'REQUEST_FAILURE', payload: 'Error on fetching sheet rows data' })
         } finally {
@@ -99,6 +105,8 @@ function useFetchDataBySheet() {
         }
     }, [state.data.sheetInfo])
 
+    const getReccurencyExpensesSum = () => Math.round(state.data.recurrentExpenses.reduce((acc, current) => acc + current.value, 0));
+    const getCurrentExpensesSum = () => Math.round(state.data.expenses.reduce((acc, current) => acc + current.value, 0));
 
     useEffect(() => {
         if (!state.data.sheetInfo) {
@@ -124,6 +132,8 @@ function useFetchDataBySheet() {
         addRow,
         deleteRow,
         getAllExpenses,
+        getCurrentExpensesSum,
+        getReccurencyExpensesSum,
         data: state.data,
         error: state.error,
         loading: state.loading
