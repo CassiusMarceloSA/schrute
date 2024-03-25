@@ -47,7 +47,7 @@ const Home = () => {
     return (
         <div className='bg-black p-2 h-screen w-screen color text-zinc-100 grid grid-cols-10 gap-3 grid-rows-12'>
             <nav className='bg-zinc-900 rounded-lg flex items-center justify-center col-start-1 col-end-4 row-start-1 row-end-10' >
-                Aside Here (test deploy 2)
+                Aside Here (test deploy 3)
             </nav>
             <main className=' bg-zinc-800 overflow-hidden rounded-lg flex items-center justify-between col-start-4 col-end-13 row-start-1 row-end-10 ' >
                 <div className='flex items-center justify-center w-full h-full' >
