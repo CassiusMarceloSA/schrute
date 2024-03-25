@@ -107,6 +107,29 @@ function useFetchDataBySheet() {
 
     const getReccurencyExpensesSum = () => Math.round(state.data.recurrentExpenses.reduce((acc, current) => acc + current.value, 0));
     const getCurrentExpensesSum = () => Math.round(state.data.expenses.reduce((acc, current) => acc + current.value, 0));
+    const getExpensesByCategory = () => {
+        const expenses = [...state.data.expenses, ...state.data.recurrentExpenses].reduce<{ [key: string]: number }>((acc, current) => {
+            if (acc[current.category]) {
+                return {
+                    ...acc,
+                    [current.category]: acc[current.category] + current.value
+                }
+            }
+
+            return { ...acc, [current.category]: current.value }
+        }, {})
+
+        const response = [];
+
+        for (const category in expenses) {
+            response.push({
+                category,
+                value: Math.round(expenses[category])
+            })
+        }
+
+        return response
+    }
 
     useEffect(() => {
         if (!state.data.sheetInfo) {
@@ -134,6 +157,7 @@ function useFetchDataBySheet() {
         getAllExpenses,
         getCurrentExpensesSum,
         getReccurencyExpensesSum,
+        getExpensesByCategory,
         data: state.data,
         error: state.error,
         loading: state.loading
